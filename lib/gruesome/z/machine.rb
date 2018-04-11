@@ -5,6 +5,8 @@ require_relative 'processor'
 require_relative 'abbreviation_table'
 require_relative 'object_table'
 
+require 'stringio'
+
 module Gruesome
   module Z
 
@@ -37,36 +39,61 @@ module Gruesome
 
         # III. Instantiate CPU
         @decoder = Decoder.new(@memory)
-        @processor = Processor.new(@memory)
       end
 
-      def execute
-        while true do
-          i = @decoder.fetch
-#          var = @memory.readv(0)
-#          if var != nil
-#            puts "var %00 = " + sprintf("%04x", var)
-#            @memory.writev(0, var)
-#          end
-#          var = @memory.readv(1)
-#          if var != nil
-#            puts "var %01 = " + sprintf("%04x", @memory.readv(0x01))
-#          end
-#          puts "at $" + sprintf("%04x", @memory.program_counter) + ": " + i.to_s(@header.version)
-          @memory.program_counter += i.length
+      def run_instruction(processor, instruction)
+        @memory.program_counter += instruction.length
 
-          if i.opcode == Opcode::QUIT
-            break
-          end
+        processor.execute(instruction)
 
-          begin
-            @processor.execute(i)
-          rescue RuntimeError => fuh
-            puts "error at $" + sprintf("%04x", @memory.program_counter) + ": " + i.to_s(@header.version)
-          end
+      rescue RuntimeError => fuh
+        raise "error at $" + sprintf("%04x", @memory.program_counter) + ": " + instruction.to_s(@header.version)
+      end
+
+      def is_read?(instruction)
+        instruction.opcode == Opcode::SREAD || instruction.opcode == Opcode::READ_CHAR
+      end
+
+      def is_quit?(instruction)
+        instruction.opcode == Opcode::QUIT
+      end
+
+      def restore_and_read_input(processor)
+        @memory.restore
+        instruction = @decoder.fetch
+        if is_read?(instruction)
+          run_instruction(processor, instruction)
+        else
+          raise "Expected game to have halted waiting for user input"
         end
+      end
+
+      def start
+        processor = Processor.new(@memory)
+        run_until_halted(processor)
+      end
+
+      def continue(command)
+        input_stream = StringIO.new(command+"\n")
+        processor = Processor.new(@memory, input_stream)
+        restore_and_read_input(processor)
+        run_until_halted(processor)
+      end
+
+      def run_until_halted(processor)
+
+        next_instruction = @decoder.fetch
+
+        until is_read?(next_instruction) || is_quit?(next_instruction)
+          run_instruction(processor, next_instruction)
+          next_instruction = @decoder.fetch
+        end
+
+        if is_read?(next_instruction)
+          @memory.save
+        end
+
       end
     end
   end
 end
-

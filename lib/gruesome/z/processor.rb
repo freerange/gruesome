@@ -392,7 +392,7 @@ module Gruesome
           a = unsigned_to_signed(operands[0])
           b = unsigned_to_signed(operands[1])
           result = a.abs % b.abs
-          if a < 0 
+          if a < 0
             result = -result
           end
           @memory.writev(instruction.destination, result.to_i)
