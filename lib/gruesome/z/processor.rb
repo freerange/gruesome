@@ -11,12 +11,14 @@ require_relative 'object_table'
 module Gruesome
   module Z
     class Processor
-      def initialize(memory)
+      def initialize(memory, input_stream = $stdin, output_stream = $stdout)
         @memory = memory
         @header = Header.new(@memory.contents)
         @abbreviation_table = AbbreviationTable.new(@memory)
         @object_table = ObjectTable.new(@memory)
         @dictionary = Dictionary.new(@memory)
+        @input_stream = input_stream
+        @output_stream = output_stream
       end
 
       def routine_call(address, arguments, result_variable = nil)
@@ -202,25 +204,25 @@ module Gruesome
           end
         when Opcode::NOP
         when Opcode::NEW_LINE
-          puts  
+          @output_stream.puts
         when Opcode::POP
           # get rid of the first item on stack
           @memory.readv(0)
         when Opcode::PRINT
-          print operands[0]
+          @output_stream.print operands[0]
         when Opcode::PRINT_ADDR
-          print ZSCII.translate(0, @header.version, @memory.force_readzstr(operands[0])[1], @abbreviation_table)
+          @output_stream.print ZSCII.translate(0, @header.version, @memory.force_readzstr(operands[0])[1], @abbreviation_table)
         when Opcode::PRINT_CHAR
-          print ZSCII.translate_Zchar(operands[0])
+          @output_stream.print ZSCII.translate_Zchar(operands[0])
         when Opcode::PRINT_NUM
-          print unsigned_to_signed(operands[0]).to_s
+          @output_stream.print unsigned_to_signed(operands[0]).to_s
         when Opcode::PRINT_OBJ
-          print @object_table.object_short_text(operands[0])
+          @output_stream.print @object_table.object_short_text(operands[0])
         when Opcode::PRINT_PADDR
           str_addr = @memory.packed_address_to_byte_address(operands[0])
-          print ZSCII.translate(0, @header.version, @memory.force_readzstr(str_addr)[1], @abbreviation_table)
+          @output_stream.print ZSCII.translate(0, @header.version, @memory.force_readzstr(str_addr)[1], @abbreviation_table)
         when Opcode::PRINT_RET
-          puts operands[0]
+          @output_stream.puts operands[0]
           routine_return(1)
         when Opcode::PULL
           if @header.version == 6
@@ -260,7 +262,7 @@ module Gruesome
           time = operands[2].to_f / 10.0
           routine = operands[3]
 
-          char = $stdin.getc
+          char = @input_stream.getc
           @memory.writev(instruction.destination, ZSCII.translate_char_to_zchar(char, @header.version))
         when Opcode::REMOVE_OBJ
           @object_table.object_remove_object(operands[0])
@@ -291,14 +293,14 @@ module Gruesome
         when Opcode::SET_ATTR
           @object_table.object_set_attribute(operands[0], operands[1])
         when Opcode::SREAD
+
           # read the maximum number of bytes in the text-buffer
           max_bytes = @memory.force_readb(operands[0])
 
           # address of the next byte in the text-buffer
           addr = operands[0] + 1
-
           # read in a line of input from stdin
-          line = $stdin.readline[0..-2]
+          line = @input_stream.readline[0..-1]
 
           # truncate line to fit the max characters given by text-buffer
           if line.length > max_bytes
