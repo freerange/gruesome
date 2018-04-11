@@ -276,9 +276,9 @@ module Gruesome
         # Save contents of dynamic memory to disk
         File.open(@save_file_name, "wb+") do |f|
           f.puts @program_counter
-          f.puts (@call_stack.size / 3)
+          f.puts (@call_stack.size / 4)
           @call_stack.each_with_index do |call_stack, i|
-            if (i % 3) == 0 or (i % 3) == 1
+            if (i % 4) != 3
               f.puts call_stack
             else
               # this is stack
@@ -311,6 +311,7 @@ module Gruesome
 
           call_stack_size.times do
             num_locals = f.readline.to_i
+            num_args = f.readline.to_i
             destination = f.readline.to_i
             stack_size = f.readline.to_i
 
@@ -320,10 +321,10 @@ module Gruesome
             end
 
             @call_stack.push num_locals
+            @call_stack.push num_args
             @call_stack.push destination
             @call_stack.push stack
           end
-
           @num_locals = f.readline.to_i
           stack_size = f.readline.to_i
 
