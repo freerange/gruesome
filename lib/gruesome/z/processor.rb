@@ -300,7 +300,7 @@ module Gruesome
           # address of the next byte in the text-buffer
           addr = operands[0] + 1
           # read in a line of input from stdin
-          line = @input_stream.readline.chomp
+          line = @input_stream.readline.chomp('')
 
           # truncate line to fit the max characters given by text-buffer
           if line.length > max_bytes
