@@ -268,7 +268,7 @@ module Gruesome
           @object_table.object_remove_object(operands[0])
         when Opcode::RESTORE
           if @header.version <= 4
-            @memory.restore
+            # @memory.restore
             if @header.version >= 4
               @memory.writev(instruction.destination, 1)
             end
@@ -284,7 +284,7 @@ module Gruesome
           routine_return(0)
         when Opcode::SAVE
           if @header.version <= 4
-            @memory.save
+            # @memory.save
             if @header.version >= 4
               @memory.writev(instruction.destination, 1)
             end
