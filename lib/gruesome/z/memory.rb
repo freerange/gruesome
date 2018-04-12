@@ -118,23 +118,11 @@ module Gruesome
       end
 
       def readb(address)
-        if address < @high_base
-          force_readb(address)
-        else
-          # XXX: Access violation
-          raise "Access Violation accessing $" + sprintf("%04x", address)
-          nil
-        end
+        force_readb(address)
       end
 
       def readw(address)
-        if (address + 1) < @high_base
-          force_readw(address)
-        else
-          # XXX: Access violation
-          raise "Access Violation accessing $" + sprintf("%04x", address)
-          nil
-        end
+        force_readw(address)
       end
 
       def writeb(address, value)
