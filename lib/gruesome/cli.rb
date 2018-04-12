@@ -2,7 +2,7 @@ require 'optparse'
 
 require_relative '../gruesome'
 require_relative 'logo'
-require_relative './z/machine'
+require_relative 'runner'
 
 module Gruesome
   class CLI
@@ -56,12 +56,14 @@ module Gruesome
         when 'start'
           fail unless ARGV[1]
           game_file = ARGV[1]
-          Z::Machine.new(game_file).start
+          runner = Runner.new
+          runner.start(game_file)
         when 'continue'
           fail unless ARGV[1] && ARGV[2]
           game_file = ARGV[1]
           command = ARGV[2]
-          Z::Machine.new(game_file).continue(command)
+          runner = Runner.new
+          runner.continue(game_file, command)
         end
       end
     end
