@@ -11,7 +11,7 @@ require_relative 'object_table'
 module Gruesome
   module Z
     class Processor
-      def initialize(memory, input_stream = $stdin, output_stream = $stdout)
+      def initialize(memory, output_stream = $stdout, input_stream = $stdin)
         @memory = memory
         @header = Header.new(@memory.contents)
         @abbreviation_table = AbbreviationTable.new(@memory)

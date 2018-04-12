@@ -32,22 +32,24 @@ module Gruesome
 
     def run_game(game_file, &block)
       memory = load_game_file(game_file)
-      session_ended, memory = block.call(memory.dup)
+      output_stream = StringIO.new
+      session_ended, memory = block.call(memory.dup, output_stream)
       unless session_ended
         save_memory(game_file, memory)
       end
+      puts output_stream.string
     end
 
     def start(game_file)
-      run_game(game_file) do |memory|
-        Z::Machine.new.start(memory)
+      run_game(game_file) do |memory, output_stream|
+        Z::Machine.new.start(memory, output_stream)
       end
     end
 
     def continue(game_file, command)
-      run_game(game_file) do |memory|
+      run_game(game_file) do |memory, output_stream|
         memory = restore_memory(game_file, memory)
-        Z::Machine.new.continue(memory, command)
+        Z::Machine.new.continue(memory, output_stream, command)
       end
     end
 

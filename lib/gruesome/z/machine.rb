@@ -39,16 +39,16 @@ module Gruesome
         memory.force_writeb(0x10, flags)
       end
 
-      def start(memory)
+      def start(memory, output_stream)
         set_flags(memory)
-        processor = Processor.new(memory)
+        processor = Processor.new(memory, output_stream)
         decoder = Decoder.new(memory)
         run_until_halted(memory, decoder, processor)
       end
 
-      def continue(memory, command)
+      def continue(memory, output_stream, command)
         set_flags(memory)
-        processor = Processor.new(memory, StringIO.new(command+"\n"))
+        processor = Processor.new(memory, output_stream, StringIO.new(command+"\n"))
         decoder = Decoder.new(memory)
 
         instruction = decoder.fetch
