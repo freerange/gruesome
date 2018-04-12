@@ -20,8 +20,8 @@ module Gruesome
         # I. Create memory space
 
         memory_size = File.size(game_file)
-        save_file_name = File.basename(file, File.extname(file)) + ".sav"
-        @memory = Memory.new(file.read(memory_size), save_file_name)
+        @save_file_name = File.basename(file, File.extname(file)) + ".sav"
+        @memory = Memory.new(file.read(memory_size))
 
         # Set flags
         flags = @memory.force_readb(0x01)
@@ -59,7 +59,9 @@ module Gruesome
       end
 
       def restore_and_read_input(processor)
-        @memory.restore
+        File.open(@save_file_name) do |f|
+          @memory.restore(f)
+        end
         instruction = @decoder.fetch
         if is_read?(instruction)
           run_instruction(processor, instruction)
@@ -90,7 +92,9 @@ module Gruesome
         end
 
         if is_read?(next_instruction)
-          @memory.save
+          File.open(@save_file_name, "wb+") do |f|
+            @memory.save(f)
+          end
         end
 
       end
