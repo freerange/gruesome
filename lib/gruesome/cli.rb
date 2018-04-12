@@ -57,13 +57,15 @@ module Gruesome
           fail unless ARGV[1]
           game_file = ARGV[1]
           runner = Runner.new
-          runner.start(game_file)
+          ended, output = runner.start(game_file)
+          puts output
         when 'continue'
           fail unless ARGV[1] && ARGV[2]
           game_file = ARGV[1]
           command = ARGV[2]
           runner = Runner.new
-          runner.continue(game_file, command)
+          ended, output = runner.continue(game_file, command)
+          puts output
         end
       end
     end

@@ -37,7 +37,7 @@ module Gruesome
       unless session_ended
         save_memory(game_file, memory)
       end
-      puts output_stream.string
+      return [session_ended, output_stream.string]
     end
 
     def start(game_file)
