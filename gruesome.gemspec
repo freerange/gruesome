@@ -22,4 +22,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency "rspec"
 
   s.add_dependency "bit-struct"
+  s.add_dependency "json"
+  s.add_dependency "sinatra"
+
 end
