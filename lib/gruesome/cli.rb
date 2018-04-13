@@ -3,6 +3,8 @@ require 'optparse'
 require_relative '../gruesome'
 require_relative 'logo'
 require_relative 'runner'
+require_relative './z/dictionary'
+
 
 module Gruesome
   class CLI
@@ -53,6 +55,20 @@ module Gruesome
         end
 
         case ARGV.first
+        when 'dict'
+          game_file = ARGV[1]
+          io = LocalIO.new(game_file)
+          memory = io.load_game_file
+          dictionary = Z::Dictionary.new(memory)
+          i = 0
+          while true do
+            word =  dictionary.word(i)
+            puts word
+            i = i + 1
+            if word.start_with? "zz"
+              break
+            end
+          end
         when 'start'
           fail unless ARGV[1]
           game_file = ARGV[1]
